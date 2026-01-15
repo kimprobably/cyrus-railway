@@ -13,6 +13,10 @@ cat > /data/mcp-configs/mcp.json << 'EOF'
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=qvawbxpijxlwdkolmjrs&features=storage%2Cbranching%2Cfunctions%2Cdevelopment%2Cdebugging%2Cdatabase%2Caccount%2Cdocs"
+    },
+    "railway": {
+      "command": "npx",
+      "args": ["@railway/mcp-server"]
     }
   }
 }
