@@ -176,15 +176,71 @@ if [ "$RUN_SELF_AUTH" = "true" ]; then
   echo "Visit the URL to authorize, callback will hit Railway"
   echo "============================================"
 
-  # self-auth needs config.json to exist at /root/.cyrus/
-  mkdir -p /root/.cyrus
+  # Clear old tokens to force fresh auth
   if [ -f /data/config.json ]; then
-    cp /data/config.json /root/.cyrus/config.json
-    echo "Copied existing config to /root/.cyrus/"
-  else
-    # Create minimal config for self-auth
-    echo '{"repositories":[]}' > /root/.cyrus/config.json
-    echo "Created minimal config for self-auth"
+    echo "Clearing old tokens from config.json to force fresh auth..."
+    # Create config with repos but no tokens
+    cat > /data/config.json << 'CONFIGEOF'
+{
+  "repositories": [
+    {
+      "id": "83fafa26-a0c4-4df6-be4d-00d11c4c69e3",
+      "name": "cyrus-test-repo",
+      "repositoryPath": "/data/repos/cyrus-test-repo",
+      "baseBranch": "main",
+      "workspaceBaseDir": "/data/worktrees",
+      "isActive": true,
+      "githubUrl": "https://github.com/kimprobably/cyrus-test-repo",
+      "projectKeys": ["Cyrus Test"],
+      "mcpConfigPath": "/data/mcp-configs/mcp.json"
+    },
+    {
+      "id": "a38ad131-bfae-447c-a7df-9152bd58c273",
+      "name": "gc-member-portal",
+      "repositoryPath": "/data/repos/gc-member-portal",
+      "baseBranch": "main",
+      "workspaceBaseDir": "/data/worktrees",
+      "isActive": true,
+      "githubUrl": "https://github.com/kimprobably/gc-member-portal",
+      "projectKeys": ["GC Member Portal"],
+      "mcpConfigPath": "/data/mcp-configs/mcp.json"
+    },
+    {
+      "id": "243a327f-4b5a-4612-8377-7adf43c9dd9a",
+      "name": "gtm-system",
+      "repositoryPath": "/data/repos/gtm-system",
+      "baseBranch": "main",
+      "workspaceBaseDir": "/data/worktrees",
+      "isActive": true,
+      "githubUrl": "https://github.com/kimprobably/gtm-system",
+      "projectKeys": ["GTM System"],
+      "mcpConfigPath": "/data/mcp-configs/mcp.json"
+    },
+    {
+      "id": "a77b8a10-42b5-4e9f-8c1d-ed7dc3f9ddae",
+      "name": "linkedin-leadmagnet-migration",
+      "repositoryPath": "/data/repos/linkedin-leadmagnet-migration",
+      "baseBranch": "main",
+      "workspaceBaseDir": "/data/worktrees",
+      "isActive": true,
+      "githubUrl": "https://github.com/kimprobably/linkedin-leadmagnet-migration",
+      "projectKeys": ["LinkedIn Leadmagnet"],
+      "mcpConfigPath": "/data/mcp-configs/mcp.json"
+    },
+    {
+      "id": "f9e0e607-ee04-4b17-914b-9448b53cb01e",
+      "name": "music-creator-analyzer",
+      "repositoryPath": "/data/repos/music-creator-analyzer",
+      "baseBranch": "main",
+      "workspaceBaseDir": "/data/worktrees",
+      "isActive": true,
+      "githubUrl": "https://github.com/kimprobably/music-creator-analyzer",
+      "projectKeys": ["Music Creator Analyzer"],
+      "mcpConfigPath": "/data/mcp-configs/mcp.json"
+    }
+  ]
+}
+CONFIGEOF
   fi
 
   # self-auth uses CYRUS_SERVER_PORT for callback server
