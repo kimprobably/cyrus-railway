@@ -33,8 +33,7 @@ CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
 GITHUB_TOKEN=${GITHUB_TOKEN}
 EOF
 
-# Build config.json from environment variables
-# LINEAR_TOKEN and LINEAR_REFRESH_TOKEN should be set in Railway
+# Build config.json in the CYRUS_HOME location (/data)
 cat > /data/config.json << EOF
 {
   "repositories": [
@@ -117,9 +116,16 @@ cat > /data/config.json << EOF
 }
 EOF
 
-# Configure git
+# Also copy to where Cyrus looks by default
+mkdir -p /root/.cyrus
+cp /data/config.json /root/.cyrus/config.json
+
+# Configure git with user info and credentials
 git config --global user.email "cyrus@railway.app"
 git config --global user.name "Cyrus"
+
+# Configure git to use GITHUB_TOKEN for authentication
+git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
 # Clone repos if they don't exist
 mkdir -p /data/repos
@@ -144,8 +150,7 @@ clone_if_missing "music-creator-analyzer" "https://github.com/kimprobably/music-
 
 cd /data
 
-# GitHub CLI will use GITHUB_TOKEN env var automatically
 echo "GitHub CLI will use GITHUB_TOKEN from environment"
 
 echo "Starting Cyrus..."
-exec cyrus --env-file=/data/.env
+exec cyrus --env-file=/data/.env --config=/data/config.json
