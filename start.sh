@@ -152,12 +152,27 @@ cd /data
 
 echo "GitHub CLI will use GITHUB_TOKEN from environment"
 
-# Start socat to proxy from 0.0.0.0:3456 to localhost:3457
-# This is needed because Cyrus binds to localhost only
-echo "Starting port proxy..."
-socat TCP-LISTEN:3456,fork,reuseaddr,bind=0.0.0.0 TCP:localhost:3457 &
-
-echo "Starting Cyrus..."
 export CYRUS_HOME=/data
-export CYRUS_SERVER_PORT=3457
-exec cyrus --env-file=/data/.env
+
+# Check if we need to run self-auth (RUN_SELF_AUTH env var)
+if [ "$RUN_SELF_AUTH" = "true" ]; then
+  echo "Running self-auth mode..."
+  echo "============================================"
+  echo "After deployment, check logs for OAuth URL"
+  echo "Visit the URL to authorize, callback will hit Railway"
+  echo "============================================"
+  # self-auth uses CYRUS_SERVER_PORT for callback server
+  # Forward Railway port 3456 -> self-auth on 3457
+  export CYRUS_SERVER_PORT=3457
+  socat TCP-LISTEN:3456,fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:3457 &
+  sleep 1
+  exec cyrus self-auth --env-file=/data/.env
+else
+  # Normal mode - start socat proxy and cyrus
+  echo "Starting port proxy..."
+  socat TCP-LISTEN:3456,fork,reuseaddr,bind=0.0.0.0 TCP:localhost:3457 &
+
+  echo "Starting Cyrus..."
+  export CYRUS_SERVER_PORT=3457
+  exec cyrus --env-file=/data/.env
+fi
