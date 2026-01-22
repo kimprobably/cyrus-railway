@@ -21,9 +21,9 @@ RUN npm install -g @anthropic-ai/claude-code cyrus-ai
 # Create cyrus directories
 RUN mkdir -p /data/repos /data/worktrees /data/mcp-configs
 
-# Copy startup script
+# Copy startup script and fix line endings
 COPY start.sh /start.sh
-RUN chmod +x /start.sh
+RUN sed -i 's/\r$//' /start.sh && chmod +x /start.sh
 
 # Set working directory
 WORKDIR /data
@@ -34,5 +34,5 @@ ENV CYRUS_HOME=/data
 
 EXPOSE 3456
 
-# Start with startup script
-CMD ["/start.sh"]
+# Start with startup script using bash explicitly
+CMD ["/bin/bash", "/start.sh"]
