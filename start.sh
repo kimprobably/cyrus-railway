@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # Create MCP config
 mkdir -p /data/mcp-configs
@@ -34,7 +33,7 @@ CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
 GITHUB_TOKEN=${GITHUB_TOKEN}
 EOF
 
-# Create config.json if it doesn't exist (will be populated by self-auth)
+# Create config.json if it doesn't exist
 if [ ! -f /data/config.json ]; then
   echo '{"repositories":[]}' > /data/config.json
 fi
@@ -43,8 +42,8 @@ fi
 git config --global user.email "cyrus@railway.app"
 git config --global user.name "Cyrus"
 
-# Authenticate GitHub CLI
-echo "${GITHUB_TOKEN}" | gh auth login --with-token
+# GitHub CLI will use GITHUB_TOKEN env var automatically, no need to login
+echo "GitHub CLI will use GITHUB_TOKEN from environment"
 
-# Start Cyrus
+echo "Starting Cyrus..."
 exec cyrus --env-file=/data/.env
