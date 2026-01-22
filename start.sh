@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set CYRUS_HOME early so all cyrus commands use /data
+export CYRUS_HOME=/data
+
 # Create MCP config
 mkdir -p /data/mcp-configs
 cat > /data/mcp-configs/mcp.json << 'EOF'
@@ -33,8 +36,13 @@ CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
 GITHUB_TOKEN=${GITHUB_TOKEN}
 EOF
 
-# Build config.json in the CYRUS_HOME location (/data)
-cat > /data/config.json << EOF
+# Only build config.json if it doesn't exist or has no tokens
+# (self-auth saves tokens to $CYRUS_HOME/config.json = /data/config.json)
+if [ -f /data/config.json ] && grep -q "lin_oauth_" /data/config.json; then
+  echo "Using existing config with tokens from self-auth"
+else
+  echo "Creating config.json from environment variables"
+  cat > /data/config.json << EOF
 {
   "repositories": [
     {
@@ -116,9 +124,10 @@ cat > /data/config.json << EOF
 }
 EOF
 
-# Also copy to where Cyrus looks by default
-mkdir -p /root/.cyrus
-cp /data/config.json /root/.cyrus/config.json
+  # Copy to where Cyrus looks by default
+  mkdir -p /root/.cyrus
+  cp /data/config.json /root/.cyrus/config.json
+fi
 
 # Configure git with user info and credentials
 git config --global user.email "cyrus@railway.app"
