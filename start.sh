@@ -153,4 +153,5 @@ cd /data
 echo "GitHub CLI will use GITHUB_TOKEN from environment"
 
 echo "Starting Cyrus..."
-exec cyrus --env-file=/data/.env --config=/data/config.json
+export CYRUS_HOME=/data
+exec cyrus --env-file=/data/.env
