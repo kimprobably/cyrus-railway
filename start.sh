@@ -3,6 +3,11 @@
 # Set CYRUS_HOME early so all cyrus commands use /data
 export CYRUS_HOME=/data
 
+# Symlink /root/.cyrus to /data so Cyrus uses persistent volume
+rm -rf /root/.cyrus 2>/dev/null
+ln -sf /data /root/.cyrus
+echo "Symlinked /root/.cyrus -> /data"
+
 # Create MCP config
 mkdir -p /data/mcp-configs
 cat > /data/mcp-configs/mcp.json << 'EOF'
@@ -170,6 +175,18 @@ if [ "$RUN_SELF_AUTH" = "true" ]; then
   echo "After deployment, check logs for OAuth URL"
   echo "Visit the URL to authorize, callback will hit Railway"
   echo "============================================"
+
+  # self-auth needs config.json to exist at /root/.cyrus/
+  mkdir -p /root/.cyrus
+  if [ -f /data/config.json ]; then
+    cp /data/config.json /root/.cyrus/config.json
+    echo "Copied existing config to /root/.cyrus/"
+  else
+    # Create minimal config for self-auth
+    echo '{"repositories":[]}' > /root/.cyrus/config.json
+    echo "Created minimal config for self-auth"
+  fi
+
   # self-auth uses CYRUS_SERVER_PORT for callback server
   # Forward Railway port 3456 -> self-auth on 3457
   export CYRUS_SERVER_PORT=3457
