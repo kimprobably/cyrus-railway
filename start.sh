@@ -25,7 +25,7 @@ EOF
 cat > /data/.env << EOF
 LINEAR_DIRECT_WEBHOOKS=true
 CYRUS_BASE_URL=${CYRUS_BASE_URL}
-CYRUS_SERVER_PORT=${CYRUS_SERVER_PORT:-3456}
+CYRUS_SERVER_PORT=3457
 LINEAR_CLIENT_ID=${LINEAR_CLIENT_ID}
 LINEAR_CLIENT_SECRET=${LINEAR_CLIENT_SECRET}
 LINEAR_WEBHOOK_SECRET=${LINEAR_WEBHOOK_SECRET}
@@ -152,6 +152,12 @@ cd /data
 
 echo "GitHub CLI will use GITHUB_TOKEN from environment"
 
+# Start socat to proxy from 0.0.0.0:3456 to localhost:3457
+# This is needed because Cyrus binds to localhost only
+echo "Starting port proxy..."
+socat TCP-LISTEN:3456,fork,reuseaddr,bind=0.0.0.0 TCP:localhost:3457 &
+
 echo "Starting Cyrus..."
 export CYRUS_HOME=/data
+export CYRUS_SERVER_PORT=3457
 exec cyrus --env-file=/data/.env
