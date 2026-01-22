@@ -181,6 +181,11 @@ else
   echo "Starting port proxy..."
   socat TCP-LISTEN:3456,fork,reuseaddr,bind=0.0.0.0 TCP:localhost:3457 &
 
+  # Copy config to where Cyrus looks for it
+  mkdir -p /root/.cyrus
+  cp /data/config.json /root/.cyrus/config.json
+  echo "Copied config.json to /root/.cyrus/"
+
   echo "Starting Cyrus..."
   export CYRUS_SERVER_PORT=3457
   exec cyrus --env-file=/data/.env
